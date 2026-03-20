@@ -78,12 +78,12 @@ const Applications = ({ isDarkMode }: ApplicationsProps) => {
         const data = await ApiService.getAppList();
         // Sort by size and filter system apps
         const sortedApps = data
-          .filter((app: any) => !appTitleIdBlackList.includes(app.titleId))
-          .sort((a: any, b: any) => b.size - a.size);
+          .filter((app: App) => !appTitleIdBlackList.includes(app.titleId))
+          .sort((a: App, b: App) => b.size - a.size);
         setApps(sortedApps);
         setError(null);
       } catch (err) {
-        console.error("Apps yüklenemedi:", err);
+        console.error("Failed to load applications:", err);
         setError("Failed to load applications");
       } finally {
         setLoading(false);
