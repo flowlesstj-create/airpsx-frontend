@@ -123,6 +123,12 @@ const FileManager = ({ contextMenu, setContextMenu, isDarkMode = true, onOpenWin
   };
 
   const navigateToPath = async (path: string) => {
+    // Validate path to prevent directory traversal attacks
+    if (path.includes('..') || !path.startsWith('/')) {
+      setError('Invalid path');
+      return;
+    }
+    
     const normalizedPath = path.endsWith('/') ? path : path + '/';
     
     // Clear context menu
@@ -512,14 +518,11 @@ const FileManager = ({ contextMenu, setContextMenu, isDarkMode = true, onOpenWin
     const confirmMessage = itemsToDelete.length > 1
       ? `Are you sure you want to delete these ${itemsToDelete.length} items?\n\n${fileList}`
       : `Are you sure you want to delete "${item.name}"?`;
-
     if (window.confirm(confirmMessage)) {
       const newItems = items.filter(item => !selectedItems.has(item.id));
       setItems(newItems);
       setSelectedItems(new Set());
-      console.log("Deleted items:", itemsToDelete.map(item => item.name));
     }
-
     setContextMenu({ ...contextMenu, show: false });
   };
 

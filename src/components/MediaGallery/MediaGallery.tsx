@@ -101,10 +101,14 @@ const MediaGallery = ({ isDarkMode }: MediaGalleryProps) => {
 
   const downloadMedia = (mediaItem: MediaItem) => {
     try {
+      // Validate filePath to prevent potential XSS through malicious filenames
+      const fileName = mediaItem.filePath.split('/').pop() || 'media';
+      const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      
       const url = ApiService.getMediaUrl(mediaItem.filePath + "?download=true");
       const a = document.createElement('a');
       a.href = url;
-      a.download = mediaItem.filePath.split('/').pop() || 'media';
+      a.download = sanitizedFileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -127,7 +131,18 @@ const MediaGallery = ({ isDarkMode }: MediaGalleryProps) => {
 
   const getGameTitle = (titleId?: string): string => {
     if (!titleId) return "Unknown";
-    return titles[titleId] || "Deleted Games and Apps";
+    const title = titles[titleId] || "Deleted Games and Apps";
+    // Basic sanitization to prevent XSS through title data
+    return title.replace(/[<>"'&]/g, (char) => {
+      const entities: Record<string, string> = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '&': '&amp;'
+      };
+      return entities[char] || char;
+    });
   };
 
   const getFilteredMedia = (): MediaItem[] => {
@@ -245,7 +260,7 @@ const MediaGallery = ({ isDarkMode }: MediaGalleryProps) => {
         ) : (
           <div className="media-grid">
             {filteredMedia.map((item, index) => (
-              <div key={index} className="media-item" onClick={() => openViewer(item)}>
+              <div key={item.filePath} className="media-item" onClick={() => openViewer(item)}>
                 <div className="media-thumbnail">
                   {item.isVideo && <div className="video-indicator">▶</div>}
                   {item.isJxr ? (

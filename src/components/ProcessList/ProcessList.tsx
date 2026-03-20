@@ -36,15 +36,7 @@ const ProcessList = ({ isDarkMode }: ProcessListProps) => {
     key: "pid",
     direction: "asc",
   });
-  const [uptimeRefresh, setUptimeRefresh] = useState(0);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setUptimeRefresh((prev) => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     const fetchProcesses = async () => {
@@ -141,7 +133,9 @@ const ProcessList = ({ isDarkMode }: ProcessListProps) => {
 
   const formatMemory = (size: number): string => {
     // pageSize multiplied by rssize gives the actual memory usage
-    const bytes = size * 16384; // pageSize fixed 16384
+    // PAGE_SIZE: 16384 bytes (16KB) - fixed page size for the system
+    const PAGE_SIZE = 16384;
+    const bytes = size * PAGE_SIZE;
     const mb = bytes / (1024 * 1024);
     return `${mb.toFixed(1)} MB`;
   };
