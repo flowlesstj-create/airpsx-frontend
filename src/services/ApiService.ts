@@ -135,7 +135,7 @@ class ApiService {
     }
 
     static getTitleImageUrl(titleId: string): string {
-        return `${API_URL}/api/title/image/${titleId}`;
+        return `${API_URL}/api/title/image/${encodeURIComponent(titleId)}`;
     }
 
     static async getSystemStatus(): Promise<SystemStatus> {
@@ -165,7 +165,7 @@ class ApiService {
     }
 
     static getProfileImageUrl(profileId: string): string {
-        return `${API_URL}/api/profile/image/${profileId}`;
+        return `${API_URL}/api/profile/image/${encodeURIComponent(profileId)}`;
     }
 
     static async downloadBackup(profileId: string | null = null): Promise<void> {
@@ -312,6 +312,13 @@ class ApiService {
 
     static async downloadFiles(paths: string[]): Promise<void> {
         try {
+            // Validate paths to prevent directory traversal
+            for (const path of paths) {
+                if (path.includes('..')) {
+                    throw new Error('Invalid path: directory traversal not allowed');
+                }
+            }
+            
             // Concatenate file paths with commas and convert to base64
             const key = btoa(paths.join(','));
             
@@ -378,6 +385,11 @@ class ApiService {
 
     static async executePayload(path: string): Promise<any> {
         try {
+            // Validate path to prevent directory traversal
+            if (path.includes('..')) {
+                throw new Error('Invalid path: directory traversal not allowed');
+            }
+            
             const response = await fetch(`${API_URL}/api/fs/payload`, {
                 method: 'POST',
                 headers: {
@@ -535,7 +547,7 @@ class ApiService {
     
     // File Stream API Methods
     static getStreamUrl(path: string): string {
-        return `${API_URL}/api/fs/stream/${path}`;
+        return `${API_URL}/api/fs/stream/${encodeURIComponent(path)}`;
     }
 
     static async getRemoteScripts(): Promise<RemoteScript[]> {
@@ -547,7 +559,7 @@ class ApiService {
     }
 
     static getScriptImageUrl(key: string): string {
-        return `${API_URL}/api/script/remote/image/${key}`;
+        return `${API_URL}/api/script/remote/image/${encodeURIComponent(key)}`;
     }
 
     static async executeRemoteScript(key: string): Promise<any> {
