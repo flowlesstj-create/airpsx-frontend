@@ -58,9 +58,13 @@ class ToastService {
     if (!this.container) return;
 
     // Dark mode check
-    const isDarkMode = document.body.classList.contains('dark') || 
-                       document.documentElement.classList.contains('dark') ||
-                       localStorage.getItem('theme') === 'dark';
+    let isDarkMode = document.body.classList.contains('dark') || 
+                       document.documentElement.classList.contains('dark');
+    try {
+      isDarkMode = isDarkMode || localStorage.getItem('theme') === 'dark';
+    } catch (e) {
+      // localStorage not available (private browsing, restricted environment)
+    }
 
     if (isDarkMode) {
       this.container.classList.add('dark');
@@ -83,7 +87,16 @@ class ToastService {
       this.container
     );
   }
-}
+  }
+
+  static destroy(): void {
+    if (this.container) {
+      render(null, this.container);
+      this.container.remove();
+      this.container = null;
+      this.toasts = [];
+    }
+  }
 
 export default ToastService;
 
