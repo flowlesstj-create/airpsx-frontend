@@ -79,8 +79,12 @@ const Desktop = () => {
     item: null,
   });
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme ? savedTheme === "dark" : true;
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      return savedTheme ? savedTheme === "dark" : true;
+    } catch {
+      return true;
+    }
   });
   const [storage, setStorage] = useState<StorageInfo[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
@@ -95,7 +99,11 @@ const Desktop = () => {
   const [selectedIconIndex, setSelectedIconIndex] = useState<number>(-1);
   const [showSystemDetails, setShowSystemDetails] = useState<boolean>(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean>(() => {
-    return document.cookie.includes('disclaimerAccepted=true');
+    try {
+      return document.cookie.split(';').some(c => c.trim().startsWith('disclaimerAccepted=true'));
+    } catch {
+      return false;
+    }
   });
   const [pkgUploadStatus, setPkgUploadStatus] = useState<PkgUploadStatus>({
     uploading: false,
@@ -114,9 +122,12 @@ const Desktop = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    try {
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    } catch {
+      // localStorage not available (private browsing)
+    }
   }, [isDarkMode]);
-
   const fetchStorage = async () => {
     try {
       const data = await ApiService.getStorageInfo();
@@ -554,6 +565,26 @@ const Desktop = () => {
       setUrlInstallStatus({
         loading: false,
         error: 'Please enter a valid URL',
+        success: false
+      });
+      return;
+    }
+
+    // Validate URL uses HTTPS protocol
+    try {
+      const url = new URL(packageUrl.trim());
+      if (url.protocol !== 'https:') {
+        setUrlInstallStatus({
+          loading: false,
+          error: 'Only HTTPS URLs are allowed for security',
+          success: false
+        });
+        return;
+      }
+    } catch {
+      setUrlInstallStatus({
+        loading: false,
+        error: 'Invalid URL format',
         success: false
       });
       return;
