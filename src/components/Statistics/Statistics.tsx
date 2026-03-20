@@ -94,6 +94,15 @@ const Statistics = ({ isDarkMode }: StatisticsProps) => {
     };
   };
 
+  // Prevent CSV formula injection by escaping values starting with =, +, -, or @
+  const escapeCSVValue = (value: string): string => {
+    if (!value) return value;
+    if (/^[=+\-@]/.test(value)) {
+      return "'" + value;
+    }
+    return value;
+  };
+
   const exportToCSV = () => {
     if (stats.length === 0) return;
 
@@ -116,7 +125,7 @@ const Statistics = ({ isDarkMode }: StatisticsProps) => {
       const titleID = stat.titleID || "";
       const titleName = stat.titleName || "";
 
-      return [timestamp, frequency, temperature, socTemp, titleID, titleName].join(",");
+      return [timestamp, frequency, temperature, socTemp, escapeCSVValue(titleID), escapeCSVValue(titleName)].join(",");
     });
 
     // Combine header and content
@@ -139,7 +148,7 @@ const Statistics = ({ isDarkMode }: StatisticsProps) => {
     document.body.removeChild(link);
   };
 
-  const chartOptions: any = {
+  const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
