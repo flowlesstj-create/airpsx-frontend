@@ -34,16 +34,17 @@ const TaskBar = ({
               activeWindow === window.id ? "active" : ""
             }`}
             onClick={() => onWindowClick(window.id, activeWindow === window.id)}
+            aria-label={`Window: ${window.title}`}
           >
             {" "}
-            <span className="taskbar-window-icon icon">
+            <span className="taskbar-window-icon icon" aria-hidden="true">
               {window.icon}
             </span>{" "}
             <span className="taskbar-window-title">{window.title}</span>{" "}
           </button>
         ))}{" "}
       </div>{" "}
-      <button className="taskbar-theme-toggle icon" onClick={onThemeToggle}>
+      <button className="taskbar-theme-toggle icon" onClick={onThemeToggle} aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}>
         {" "}
         {isDarkMode ? "☀️" : "🌙"}{" "}
       </button>{" "}
