@@ -31,7 +31,7 @@ const Toast = ({ message, type = "info", duration = 3000, onClose }: ToastProps)
         {type === "warning" && "⚠"}
         {type === "info" && "ℹ"}
       </div>
-      <div className="toast-message">{message}</div>
+      <div className="toast-message" dangerouslySetInnerHTML={{ __html: message.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char] || char)) }} />
       <button className="toast-close" onClick={() => setIsVisible(false)}>
         ×
       </button>
